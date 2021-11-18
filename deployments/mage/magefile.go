@@ -19,7 +19,10 @@
 package main
 
 import (
+	"fmt"
+	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+	"os"
 	// mage:import
 	_ "github.com/ZupIT/horusec-devkit/pkg/utils/mageutils"
 )
@@ -36,4 +39,81 @@ func UpdateHorusecVersionInProject(actualVersion, releaseVersion string) error {
 	return sh.RunV(
 		`find . -type f -not -path "./.git/*" -not -path "./Makefile" -not -path "./manager/cypress/*" -not -path "./manager/cypress/*" -not -name "*.sum" -not -name "*.mod"|
           xargs sed -i "s/` + actualVersion + `/` + releaseVersion + `/g"`)
+}
+
+func DockerPushPlatformGoProjects(tag string) error {
+	for _, image := range getImages() {
+		if err := sh.RunV("docker", "push", fmt.Sprintf("%s:%s", image, tag)); err != nil {
+			return fmt.Errorf("failed to push %s with error %s", fmt.Sprintf("%s:%s", image, tag), err.Error())
+		}
+	}
+	return nil
+}
+
+func DockerSignPlatformGoProjects(tag string) error {
+	mg.Deps(hasAllNecessaryEnvs, isCosignInstalled)
+	err := os.MkdirAll("./tmp", 0700)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile("./tmp/cosign.key", []byte(os.Getenv("COSIGN_KEY")), 0700)
+	if err != nil {
+		return err
+	}
+	for _, image := range getImages() {
+		if err := sh.RunV("cosign", "sign", "-key", "./tmp/cosign.key", fmt.Sprintf("%s:%s", image, tag)); err != nil {
+			return fmt.Errorf("failed to push %s with error %s", fmt.Sprintf("%s:%s", image, tag), err.Error())
+		}
+	}
+	return nil
+}
+
+const (
+	ImageMessages      = "osodracnai/horusec-messages"
+	ImageWebhook       = "osodracnai/horusec-webhook"
+	ImageAuth          = "osodracnai/horusec-auth"
+	ImageAnalytic      = "osodracnai/horusec-analytic"
+	ImageVulnerability = "osodracnai/horusec-vulnerability"
+	ImageMigrations    = "osodracnai/horusec-migrations"
+	ImageCore          = "osodracnai/horusec-core"
+	ImageApi           = "osodracnai/horusec-api"
+)
+
+func getImages() []string {
+	return []string{
+		ImageMessages,
+		ImageWebhook,
+		ImageAuth,
+		ImageAnalytic,
+		ImageVulnerability,
+		ImageMigrations,
+		ImageCore,
+		ImageApi,
+	}
+}
+func isCosignInstalled() error {
+	return sh.RunV("cosign", "version")
+}
+
+func hasAllNecessaryEnvs() error {
+	var result []string
+
+	for k, v := range getConsingEnvs() {
+		if v == "" {
+			result = append(result, k)
+		}
+	}
+
+	if len(result) != 0 {
+		return fmt.Errorf("missing some env var: %v", result)
+	}
+
+	return nil
+}
+
+func getConsingEnvs() map[string]string {
+	return map[string]string{
+		"COSIGN_PWD":          os.Getenv("COSIGN_PWD"),
+		"COSIGN_KEY_LOCATION": os.Getenv("COSIGN_KEY_LOCATION"),
+	}
 }

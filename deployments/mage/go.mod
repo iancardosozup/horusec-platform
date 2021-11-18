@@ -3,7 +3,7 @@ module mage
 go 1.17
 
 require (
-	github.com/ZupIT/horusec-devkit v1.0.20-0.20211118184104-b72f9d9a7927
+	github.com/ZupIT/horusec-devkit v1.0.20-0.20211123113450-7a39e9acf0bb
 	github.com/magefile/mage v1.11.0
 )
 
