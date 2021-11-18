@@ -158,10 +158,10 @@ dockers:
       - horusec-api
       - horusec-api-migrate-v1-v2
     image_templates:
-      - "horuszup/horusec-api:latest"
-      - "horuszup/horusec-api:{{ .Tag }}"
-      - "horuszup/horusec-api:v{{ .Major }}"
-      - "horuszup/horusec-api:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-api:latest"
+      - "osodracnai/horusec-api:{{ .Tag }}"
+      - "osodracnai/horusec-api:v{{ .Major }}"
+      - "osodracnai/horusec-api:v{{ .Major }}.{{ .Minor }}"
     skip_push: false
 
     dockerfile: ./api/deployments/dockerfiles/Dockerfile.goreleaser
@@ -181,10 +181,10 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - "horuszup/horusec-migrations:latest"
-      - "horuszup/horusec-migrations:{{ .Tag }}"
-      - "horuszup/horusec-migrations:v{{ .Major }}"
-      - "horuszup/horusec-migrations:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-migrations:latest"
+      - "osodracnai/horusec-migrations:{{ .Tag }}"
+      - "osodracnai/horusec-migrations:v{{ .Major }}"
+      - "osodracnai/horusec-migrations:v{{ .Major }}.{{ .Minor }}"
     skip_push: false
     dockerfile: ./migrations/deployments/dockerfiles/Dockerfile.goreleaser
     use: docker
@@ -244,10 +244,10 @@ dockers:
     ids:
       - horusec-core
     image_templates:
-      - "horuszup/horusec-core:latest"
-      - "horuszup/horusec-core:{{ .Tag }}"
-      - "horuszup/horusec-core:v{{ .Major }}"
-      - "horuszup/horusec-core:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-core:latest"
+      - "osodracnai/horusec-core:{{ .Tag }}"
+      - "osodracnai/horusec-core:v{{ .Major }}"
+      - "osodracnai/horusec-core:v{{ .Major }}.{{ .Minor }}"
 
     skip_push: false
 
@@ -270,10 +270,10 @@ dockers:
     ids:
       - horusec-auth
     image_templates:
-      - "horuszup/horusec-auth:latest"
-      - "horuszup/horusec-auth:{{ .Tag }}"
-      - "horuszup/horusec-auth:v{{ .Major }}"
-      - "horuszup/horusec-auth:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-auth:latest"
+      - "osodracnai/horusec-auth:{{ .Tag }}"
+      - "osodracnai/horusec-auth:v{{ .Major }}"
+      - "osodracnai/horusec-auth:v{{ .Major }}.{{ .Minor }}"
 
     skip_push: false
 
@@ -297,10 +297,10 @@ dockers:
       - horusec-analytic
       - horusec-analytic-migrate-v1-v2
     image_templates:
-      - "horuszup/horusec-analytic:latest"
-      - "horuszup/horusec-analytic:{{ .Tag }}"
-      - "horuszup/horusec-analytic:v{{ .Major }}"
-      - "horuszup/horusec-analytic:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-analytic:latest"
+      - "osodracnai/horusec-analytic:{{ .Tag }}"
+      - "osodracnai/horusec-analytic:v{{ .Major }}"
+      - "osodracnai/horusec-analytic:v{{ .Major }}.{{ .Minor }}"
 
     skip_push: false
 
@@ -323,10 +323,10 @@ dockers:
     ids:
       - horusec-messages
     image_templates:
-      - "horuszup/horusec-messages:latest"
-      - "horuszup/horusec-messages:{{ .Tag }}"
-      - "horuszup/horusec-messages:v{{ .Major }}"
-      - "horuszup/horusec-messages:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-messages:latest"
+      - "osodracnai/horusec-messages:{{ .Tag }}"
+      - "osodracnai/horusec-messages:v{{ .Major }}"
+      - "osodracnai/horusec-messages:v{{ .Major }}.{{ .Minor }}"
 
     skip_push: false
 
@@ -349,10 +349,10 @@ dockers:
     ids:
       - horusec-vulnerability
     image_templates:
-      - "horuszup/horusec-vulnerability:latest"
-      - "horuszup/horusec-vulnerability:{{ .Tag }}"
-      - "horuszup/horusec-vulnerability:v{{ .Major }}"
-      - "horuszup/horusec-vulnerability:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-vulnerability:latest"
+      - "osodracnai/horusec-vulnerability:{{ .Tag }}"
+      - "osodracnai/horusec-vulnerability:v{{ .Major }}"
+      - "osodracnai/horusec-vulnerability:v{{ .Major }}.{{ .Minor }}"
 
     skip_push: false
 
@@ -375,10 +375,10 @@ dockers:
     ids:
       - horusec-webhook
     image_templates:
-      - "horuszup/horusec-webhook:latest"
-      - "horuszup/horusec-webhook:{{ .Tag }}"
-      - "horuszup/horusec-webhook:v{{ .Major }}"
-      - "horuszup/horusec-webhook:v{{ .Major }}.{{ .Minor }}"
+      - "osodracnai/horusec-webhook:latest"
+      - "osodracnai/horusec-webhook:{{ .Tag }}"
+      - "osodracnai/horusec-webhook:v{{ .Major }}"
+      - "osodracnai/horusec-webhook:v{{ .Major }}.{{ .Minor }}"
 
     skip_push: false
 
