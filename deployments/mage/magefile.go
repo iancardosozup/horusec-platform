@@ -32,13 +32,14 @@ func UpdatePackageJson(version string) error {
 	if err := sh.RunV("npm", "install", "-g", "json"); err != nil {
 		return err
 	}
-	return sh.RunV("json", "-I", "-f", "./manager/package.json", "-e", `'this.version=`, version, `'`)
+	return sh.RunV("json", "-I", "-f", "./manager/package.json", "-e", `'this.version="`+version+`"'`)
 }
 
 func UpdateHorusecVersionInProject(actualVersion, releaseVersion string) error {
+	dir, _ := os.Getwd()
+	fmt.Println(dir)
 	return sh.RunV(
-		`find . -type f -not -path "./.git/*" -not -path "./Makefile" -not -path "./manager/cypress/*" -not -path "./manager/cypress/*" -not -name "*.sum" -not -name "*.mod"|
-          xargs sed -i "s/` + actualVersion + `/` + releaseVersion + `/g"`)
+		`find ./ -type f -not -path "./.git/*" -not -path "./Makefile" -not -path "./manager/cypress/*"  -not -name "*.sum" -not -name "*.mod"| xargs  sed -t -i "s/v2.17.1/v2.17.2/g"`)
 }
 
 func DockerPushPlatformGoProjects(tag string) error {
@@ -107,13 +108,17 @@ func hasAllNecessaryEnvs() error {
 	if len(result) != 0 {
 		return fmt.Errorf("missing some env var: %v", result)
 	}
+	if err := os.Setenv("COSIGN_PASSWORD", os.Getenv("COSIGN_PWD")); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func getConsingEnvs() map[string]string {
 	return map[string]string{
-		"COSIGN_PWD":          os.Getenv("COSIGN_PWD"),
-		"COSIGN_KEY_LOCATION": os.Getenv("COSIGN_KEY_LOCATION"),
+		"COSIGN_PWD": os.Getenv("COSIGN_PWD"),
+		"COSIGN_KEY": os.Getenv("COSIGN_KEY"),
 	}
+
 }

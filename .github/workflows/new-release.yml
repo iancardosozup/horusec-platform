@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: New-Release
+name: release-new
 
 on:
   workflow_dispatch:
@@ -58,10 +58,11 @@ jobs:
           cosign-release: 'v1.2.0'
 
       - name: Install Mage
-        run: go install github.com/magefile/mage@07afc7d24f4d6d6442305d49552f04fbda5ccb3e
+        run: |
+          cd deployments/mage/ && go run mage.go -compile ../../mage
 
       - name: Git config
-        run: cd deployments/mage/ && mage -v defaultGitConfig
+        run: ./mage -v defaultGitConfig
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v4
@@ -72,38 +73,23 @@ jobs:
           git_commit_gpgsign: true
 
       - name: Install cosign private key
-        run: cd deployments/mage/ && mage -v writeCosignKeyToFile
+        run: ./mage -v writeCosignKeyToFile
         env:
           COSIGN_KEY: ${{secrets.COSIGN_KEY}}
 
       - name: Version increment
         id: updated-version
         run: |
-          cd deployments/mage/ && mage -v upVersions ${{ github.event.inputs.releaseType }}
+          ./mage -v upVersions ${{ github.event.inputs.releaseType }}
         env:
           HORUSEC_REPOSITORY_ORG: ${{ github.repository_owner }}
           HORUSEC_REPOSITORY_NAME: ${{ github.event.repository.name }}
 
       - name: Checkout release candidate branch
-        run: cd deployments/mage/ && mage -v checkoutReleaseBranch ${{ steps.updated-version.outputs.nextReleaseBranchName }}
+        run: ./mage -v checkoutReleaseBranch ${{ steps.updated-version.outputs.nextReleaseBranchName }}
 
-      - name: Update versions on package.json
-        run: cd deployments/mage/ && mage -v updatePackageJson ${{ steps.updated-version.outputs.nextReleaseVersionStripped }}
-
-      - name: Update versions on rest of the project
-        run:  cd deployments/mage/ && mage -v updateHorusecVersionInProject ${{ steps.updated-version.outputs.actualReleaseVersion }} ${{ steps.updated-version.outputs.nextReleaseVersion }}  |
-
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v7.4.0
-        with:
-          push: false
-          signoff: true
-          author_name: Horusec
-          author_email: horusec@zup.com.br
-          committer_name: Horusec
-          committer_email: horusec@zup.com.br
       - name: Create local tag
-        run: cd deployments/mage/ && mage -v createLocalTag ${{ steps.updated-version.outputs.nextReleaseVersion }}
+        run: ./mage -v createLocalTag ${{ steps.updated-version.outputs.nextReleaseVersion }}
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
@@ -144,6 +130,23 @@ jobs:
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PWD }}
 
+      - name: Update versions on package.json
+        run: ./mage -v updatePackageJson ${{ steps.updated-version.outputs.nextReleaseVersionStripped }}
+
+      - name: Update versions on rest of the project
+        run: |
+          find . -type f -not -path "./.git/*" -not -path "./Makefile" -not -path "./manager/cypress/*" -not -name "*.sum" -not -name "*.mod"|
+          xargs sed -i "s/${{ steps.updated-version.outputs.actualReleaseVersion }}/${{ steps.updated-version.outputs.nextReleaseVersion }}/g"
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7.4.0
+        with:
+          push: false
+          signoff: true
+          author_name: Horusec
+          author_email: horusec@zup.com.br
+          committer_name: Horusec
+          committer_email: horusec@zup.com.br
       # This step gets the sha of last commit made, witch is the updating versioning files commit, after that creates a
       # branch from the origin main and cherry pick this commit on it. This process need to occur only when the release
       # workflow is started from a branch that isn't the main branch, for example a release branch.
@@ -152,7 +155,7 @@ jobs:
         if: github.ref != 'refs/heads/main'
         id: cherry-pick
         run: |
-          mage CherryPick
+          ./mage CherryPick
       # This step utilizes an action to create a pull request with the branch that was cherry picked on the last step
       # into the main branch. As the last commit, this also needs to run only when the release workflow is started from a
       # branch that isn't the main branch. Others workflows should be skipped cause of the skip ci in the pull request title.
