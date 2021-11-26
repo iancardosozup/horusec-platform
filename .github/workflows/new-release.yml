@@ -87,6 +87,24 @@ jobs:
 
       - name: Checkout release candidate branch
         run: ./mage -v checkoutReleaseBranch ${{ steps.updated-version.outputs.nextReleaseBranchName }}
+      - name: Update versions on package.json
+        run: ./mage -v updatePackageJson ${{ steps.updated-version.outputs.nextReleaseVersionStripped }}
+
+      - name: Update versions on rest of the project
+        run: |
+          find . -type f -not -path "./.git/*" -not -path "./manager/cypress/*" -not -name "*.sum" -not -name "*.mod"|
+          xargs sed -i "s/${{ steps.updated-version.outputs.actualReleaseVersion }}/${{ steps.updated-version.outputs.nextReleaseVersion }}/g"
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7.4.0
+        with:
+          push: false
+          signoff: true
+          author_name: Horusec
+          author_email: horusec@zup.com.br
+          committer_name: Horusec
+          committer_email: horusec@zup.com.br
+          branch: ${{ steps.updated-version.outputs.nextReleaseBranchName }}
 
       - name: Create local tag
         run: ./mage -v createLocalTag ${{ steps.updated-version.outputs.nextReleaseVersion }}
@@ -130,23 +148,7 @@ jobs:
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PWD }}
 
-      - name: Update versions on package.json
-        run: ./mage -v updatePackageJson ${{ steps.updated-version.outputs.nextReleaseVersionStripped }}
 
-      - name: Update versions on rest of the project
-        run: |
-          find . -type f -not -path "./.git/*" -not -path "./manager/cypress/*" -not -name "*.sum" -not -name "*.mod"|
-          xargs sed -i "s/${{ steps.updated-version.outputs.actualReleaseVersion }}/${{ steps.updated-version.outputs.nextReleaseVersion }}/g"
-
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v7.4.0
-        with:
-          push: false
-          signoff: true
-          author_name: Horusec
-          author_email: horusec@zup.com.br
-          committer_name: Horusec
-          committer_email: horusec@zup.com.br
       - name: Push updates
         run: |
           ./mage -v gitPushAll
@@ -155,7 +157,6 @@ jobs:
       # workflow is started from a branch that isn't the main branch, for example a release branch.
       # When the workflow it's triggered to run on main, the commit it's going to be made directly to the main branch.
       - name: Cherry pick
-        if: github.ref != 'refs/heads/main'
         id: cherry-pick
         run: |
           ./mage CherryPick
@@ -163,7 +164,6 @@ jobs:
       # into the main branch. As the last commit, this also needs to run only when the release workflow is started from a
       # branch that isn't the main branch. Others workflows should be skipped cause of the skip ci in the pull request title.
       - name: Create Pull Request
-        if: github.ref != 'refs/heads/main'
         uses: repo-sync/pull-request@v2
         with:
           source_branch: "${{ steps.cherry-pick.outputs.cherryPickBranchName }}"
